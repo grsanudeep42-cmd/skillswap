@@ -153,6 +153,24 @@ router.get('/pending', auth, async (req, res) => {
   }
 });
 
+// GET /api/matches/sent
+router.get('/sent', auth, async (req, res) => {
+  try {
+    const matches = await Match.find({
+      requester: req.user.id,
+      status: 'pending',
+    })
+      .populate('requester', '-password -__v')
+      .populate('receiver', '-password -__v')
+      .sort({ createdAt: -1 });
+
+    res.json({ matches });
+  } catch (err) {
+    console.error('Get sent matches error:', err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // PUT /api/matches/:id/respond
 router.put('/:id/respond', auth, async (req, res) => {
   try {
